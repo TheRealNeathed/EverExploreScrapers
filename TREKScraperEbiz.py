@@ -1,57 +1,39 @@
+# Hello, and welcome to our TREK scraper. This scraper scrapes bike price data from the TREK website and uploads it to TrekBikesPrices.csv
+
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from bs4 import BeautifulSoup
 import time
 import csv
 import pandas as pd
-
-startURL = "https://www.trekbikes.com/us/en_US/bikes/c/B100/?q=:relevance&page=4&pageSize=24"
+# this is just QOL for the webdriver - making it easier to use and adding in a sleep statement so no bugs happen if the website is slow to load
 browser = webdriver.Chrome("chromedriver.exe")
-browser.get(startURL)
-time.sleep(30)
 tempList = []
+# the main function that will gather the price data
 def scrape():
     headers = ["Price"]
     planetData = []
+    # There are 14 pages of data, so we have the code iterate through each page
     for i in range(1,14):
+        # Inside the loop, we add the trek bikes URL. This shows 24 bikes per page, and there are around 300.
+        startURL = f"https://www.trekbikes.com/us/en_US/bikes/c/B100/?q=:relevance&page={i}&pageSize=24"
+        browser.get(startURL)
+        time.sleep(30)
+        # BeautifulSoup is a library that will parse the website to make data more readable
         soup = BeautifulSoup(browser.page_source, "html.parser")
+        # The code goes through each list tag in the website...
         for li_tag in soup.find_all("li",attrs ={"class","cell productListItem product-list__item"}):
-            #article_tags = li_tag.find("article", attrs={"class", "product-tile"})
-            #div_tags = article_tags.find("div", attrs={"class", "product-tile__wrap"})
-            #a_tags = div_tags.find_all("a", attrs ={"class", "product-tile__link"})
-            #print(len(a_tags))
-            #div4_tags = div_tags.find_all("div", attrs={"class", "product-tile__info"})
-            #p_tags = div4_tags.find("p")
-            for bob in li_tag.find_all("span", attrs={"class","product-tile__saleprice"}):
-                tempList.append(bob.get_text())
-            #print(tempList)
-            #print(div2_tags)
-            #tempList = []
-            #for index,div2_tag in enumerate(div2_tags):
-            #    if index == 0:
-            #        tempList.append(div2_tag.find_all("span")[0].contents[0])
-            #        
-            #    else:
-            #        try:
-            #            tempList.append(div2_tag.contents[0])
-            #        except:
-            #            tempList.append("")
+            # ... and then through each span tag, which contain the prices
+            for span in li_tag.find_all("span", attrs={"class","product-tile__saleprice"}):
+                tempList.append(span.get_text())
             planetData.append(tempList)
-        try: 
-            browser.find_element(By.XPATH, value='/html/body/div[5]/div[2]/div/div[2]/main/section/div/div[2]/div/div[3]/div[1]/nav/div[2]/a').click()
-            print(f"page{i} scraping completed")
-        except:
-            df = pd.DataFrame(tempList)
-            df.to_csv("TrekBikesPrices.csv", index = False)
-            print(df.head())
-scrape()            
-    
-    
-    #with open("EbizTestPrices.csv","w") as f:
-    #    csvWriter = csv.writer(f)
-    #    csvWriter.writerow(headers)
-    #    csvWriter.writerow(tempList)
-    #df = pd.DataFrame(tempList)
-    #df.to_csv("TrekBikesPrices.csv", index = False)
-    #print(df.head())
-#scrape()            
+        # just a print statement to check if the scraping finished
+        print(f"page{i} scraping completed")
+        # going to the next page
+        i = i+1
+    # adding the prices into a spreadsheet
+    df = pd.DataFrame(tempList)
+    df.to_csv("TrekBikesPrices.csv", index = False)
+    print(df.head())
+scrape()              
+# Tada! The spreadsheet is called TrekBikesPrices.csv and contains all the bike prices.
