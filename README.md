@@ -4,4 +4,6 @@ Hello, and welcome to the scrapers we have used to gather quality bike data from
 
 For a video on how these scrapers work, please visit the main website and go to the About page.
 
+Judges and valued customers, make sure to especially check out the TREKscraper python file!
+
 Credits to the BeautifulSoup, Selenium, and Pandas libraries for helping us create the scrapers.
